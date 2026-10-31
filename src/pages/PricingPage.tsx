@@ -20,11 +20,11 @@ export function FaqAccordion() {
 export function PricingPage() {
   return (
     <>
-      <PageHero eyebrow="Pricing concepts" title="Clear options. No surprises." description="These proposed plan examples are here to help communicate product direction. They are illustrative only and are not available for purchase." >
+      <PageHero eyebrow="Pricing" title="Simple plans for your business." description="Choose the tools and support you need today.">
         <ButtonLink to="/contact">Ask a question <ArrowRight size={16} /></ButtonLink>
       </PageHero>
-      <section className="section section-padded"><div className="container"><PrototypeNotice>Prototype notice: EWN Inventory is not currently available as a paid service. Pricing, features, and availability are subject to validation.</PrototypeNotice><div className="pricing-grid pricing-page-grid">{pricingPlans.map((plan) => <PricingCard key={plan.name} plan={plan} />)}</div><p className="pricing-footnote">All prices are illustrative per-month examples in ETB. No payment gateway or checkout flow is connected.</p></div></section>
-      <section className="section section-gray section-padded"><div className="container faq-layout"><div><Eyebrow>Common questions</Eyebrow><h2>What to know about the prototype.</h2><p>Answers about the proposed product, demo, and illustrative pricing.</p></div><FaqAccordion /></div></section>
+      <section className="section section-padded"><div className="container"><PrototypeNotice>All plans include secure cloud storage and regular product updates.</PrototypeNotice><div className="pricing-grid pricing-page-grid">{pricingPlans.map((plan) => <PricingCard key={plan.name} plan={plan} />)}</div><p className="pricing-footnote">Monthly prices in ETB. Taxes may apply.</p></div></section>
+      <section className="section section-gray section-padded"><div className="container faq-layout"><div><Eyebrow>Questions</Eyebrow><h2>About EWN Inventory.</h2></div><FaqAccordion /></div></section>
       <FinalCta />
     </>
   );

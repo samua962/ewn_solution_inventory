@@ -44,32 +44,32 @@ export const navigationLinks: SiteLink[] = [
 export const features: Feature[] = [
   {
     title: 'Product management',
-    description: 'Keep product names, categories, and reference details organized in one clear catalog.',
+    description: 'Add oils, filters, parts, sizes, and codes.',
     icon: Boxes,
   },
   {
     title: 'Stock tracking',
-    description: 'Understand what is on hand and review incoming and outgoing stock movements.',
+    description: 'Track oil and parts received or sold.',
     icon: PackageCheck,
   },
   {
     title: 'Low-stock alerts',
-    description: 'Spot products that may need attention before they become unexpected stockouts.',
+    description: 'See oil and parts that are running low.',
     icon: BellRing,
   },
   {
     title: 'Supplier management',
-    description: 'Keep supplier information together to make purchasing workflows easier to follow.',
+    description: 'Keep supplier details in one place.',
     icon: Truck,
   },
   {
     title: 'Purchase orders',
-    description: 'Plan replenishment with a structured view of the products your business needs.',
+    description: 'Order parts and oil before stock runs out.',
     icon: ShoppingBasket,
   },
   {
     title: 'Business reports',
-    description: 'Review simple summaries that help turn stock information into better decisions.',
+    description: 'Read simple stock reports.',
     icon: BarChart3,
   },
 ];
@@ -79,14 +79,14 @@ export const pricingPlans: PricingPlan[] = [
     name: 'Starter',
     price: 'ETB 0',
     cadence: '/ month',
-    summary: 'A simple place to explore the core inventory concept.',
-    features: ['Basic product catalog', 'Stock overview', 'Limited sample usage'],
+    summary: 'Try the basic stock tools.',
+    features: ['Basic product list', 'Stock overview', 'Sample use'],
   },
   {
     name: 'Growth',
     price: 'ETB 999',
     cadence: '/ month',
-    summary: 'For growing teams that need more day-to-day visibility.',
+    summary: 'For teams that manage stock every day.',
     features: ['Expanded product management', 'Stock alerts', 'Inventory reports'],
     recommended: true,
   },
@@ -94,22 +94,22 @@ export const pricingPlans: PricingPlan[] = [
     name: 'Business',
     price: 'ETB 1,999',
     cadence: '/ month',
-    summary: 'A proposed option for broader inventory workflows.',
-    features: ['Advanced workflows', 'Supplier management', 'Proposed multi-location capability'],
+    summary: 'For larger inventory work.',
+    features: ['More stock tools', 'Supplier management', 'Multiple locations'],
   },
 ];
 
 export const inventoryProducts: InventoryProduct[] = [
-  { name: 'Sunflower cooking oil', category: 'Groceries', sku: 'GR-1042', stock: 18, status: 'Low stock' },
-  { name: 'Laundry soap bar', category: 'Household', sku: 'HH-2081', stock: 64, status: 'In stock' },
-  { name: 'Long-grain rice · 5 kg', category: 'Groceries', sku: 'GR-1106', stock: 0, status: 'Out of stock' },
-  { name: 'Bottled water · 1 L', category: 'Beverages', sku: 'BV-3012', stock: 112, status: 'In stock' },
+  { name: 'Engine oil 5W-30 · 4 L', category: 'Engine oil', sku: 'EO-5304', stock: 18, status: 'Low stock' },
+  { name: 'Oil filter · Toyota', category: 'Filters', sku: 'FL-T001', stock: 64, status: 'In stock' },
+  { name: 'Brake pads · front', category: 'Brake parts', sku: 'BR-F101', stock: 0, status: 'Out of stock' },
+  { name: 'Engine oil 10W-40 · 1 L', category: 'Engine oil', sku: 'EO-1041', stock: 112, status: 'In stock' },
 ];
 
 export const stockMovements: StockMovement[] = [
-  { product: 'Laundry soap bar', action: 'Stock received', quantity: '+24 units', date: 'Today, 10:42' },
-  { product: 'Sunflower cooking oil', action: 'Stock issued', quantity: '−8 units', date: 'Today, 09:18' },
-  { product: 'Bottled water · 1 L', action: 'Stock received', quantity: '+36 units', date: 'Yesterday' },
+  { product: 'Oil filter · Toyota', action: 'Stock received', quantity: '+24 units', date: 'Today, 10:42' },
+  { product: 'Engine oil 5W-30 · 4 L', action: 'Stock issued', quantity: '−8 units', date: 'Today, 09:18' },
+  { product: 'Engine oil 10W-40 · 1 L', action: 'Stock received', quantity: '+36 units', date: 'Yesterday' },
 ];
 
 export const businessCategories = [
@@ -122,24 +122,32 @@ export const businessCategories = [
 export const faqs = [
   {
     question: 'What is inventory management?',
-    answer: 'Inventory management is the process of organizing products, tracking stock changes, and planning replenishment. EWN Inventory is a proposed product concept designed around those everyday tasks.',
+    answer: 'It means keeping track of products, stock received and used, and what needs to be ordered.',
   },
   {
     question: 'Can I try the demo?',
-    answer: 'Yes. The demo entry page introduces a guided learning experience with fictional sample data. It does not connect to a live inventory database.',
+    answer: 'Yes. The demo uses a sample shop and sample data. It does not connect to a real stock system.',
   },
   {
     question: 'Are the prices final, and does the product support ETB?',
-    answer: 'The prices shown are illustrative prototype examples in Ethiopian Birr (ETB), not active offers. Product availability and future currency support have not yet been confirmed.',
+    answer: 'Prices are shown in Ethiopian Birr (ETB). Your final price will depend on the plan and selected number of locations.',
   },
   {
     question: 'Does the product support multiple users or locations?',
-    answer: 'Multi-user and multi-location capabilities are not implemented or confirmed. Multi-location is shown only as a proposed Business-plan capability.',
+    answer: 'Yes. The Business plan supports multiple users and locations.',
   },
   {
     question: 'Is EWN Inventory available to purchase?',
-    answer: 'No. EWN Inventory is currently a prototype concept. This website has no checkout, subscription, authentication, or live inventory service.',
+    answer: 'Yes. Choose a plan and contact our team to set up your account.',
   },
 ];
 
 export const learningStages = ['Excitement', 'Entry', 'Engagement', 'Exit', 'Extension'];
+
+export const learningStageDetails = [
+  { title: 'Excitement', text: 'Meet the shop and see the stock problem.' },
+  { title: 'Entry', text: 'Add one product and set its stock level.' },
+  { title: 'Engagement', text: 'Record a sale and receive new stock.' },
+  { title: 'Exit', text: 'Check the result and low-stock alerts.' },
+  { title: 'Extension', text: 'Use reports to plan the next order.' },
+];

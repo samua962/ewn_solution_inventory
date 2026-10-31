@@ -58,13 +58,13 @@ export function FeatureCard({ title, description, icon: Icon }: Feature) {
 export function PricingCard({ plan }: { plan: PricingPlan }) {
   return (
     <article className={`pricing-card${plan.recommended ? ' pricing-featured' : ''}`}>
-      {plan.recommended && <span className="recommended-label">Recommended concept</span>}
+      {plan.recommended && <span className="recommended-label">Example plan</span>}
       <h3>{plan.name}</h3>
       <p>{plan.summary}</p>
       <div className="price">{plan.price}<span>{plan.cadence}</span></div>
       <ul>{plan.features.map((feature) => <li key={feature}><Check size={16} />{feature}</li>)}</ul>
       <ButtonLink to="/contact" variant={plan.recommended ? 'primary' : 'secondary'} className="pricing-action">
-        Ask about this concept <ArrowRight size={16} />
+        Ask about this plan <ArrowRight size={16} />
       </ButtonLink>
     </article>
   );
@@ -95,8 +95,8 @@ export function FinalCta() {
   return (
     <section className="section final-cta">
       <div className="container final-cta-inner">
-        <div><Eyebrow>Take the next step</Eyebrow><h2>Ready to bring clarity to your inventory?</h2><p>Explore how EWN Inventory could help your business stay organized and make better stock decisions.</p></div>
-        <div className="final-cta-actions"><ButtonLink to="/demo">Explore the demo <ArrowRight size={16} /></ButtonLink><ButtonLink to="/contact" variant="secondary">Contact our team</ButtonLink></div>
+        <div><Eyebrow>Next step</Eyebrow><h2>Try the stock demo.</h2><p>See how EWN Inventory could work.</p></div>
+        <div className="final-cta-actions"><ButtonLink to="/demo">Try the demo <ArrowRight size={16} /></ButtonLink><ButtonLink to="/contact" variant="secondary">Contact us</ButtonLink></div>
       </div>
     </section>
   );

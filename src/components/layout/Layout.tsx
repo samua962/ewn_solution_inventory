@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useState } from 'react';
-import { ArrowRight, Menu, X } from 'lucide-react';
+import { ArrowRight, Facebook, Instagram, Linkedin, Mail, Menu, X } from 'lucide-react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { navigationLinks } from '../../data';
 import { ButtonLink } from '../ui';
@@ -71,14 +71,20 @@ export function Footer() {
       <div className="container footer-grid">
         <div className="footer-brand">
           <Logo light />
-          <p>Practical digital products for everyday business challenges.</p>
+          <p>Simple digital tools for daily business work.</p>
           <span className="footer-tagline">Smart Solutions. Better Business.</span>
+          <div className="footer-socials" aria-label="EWN Solutions social links">
+            <a href="mailto:hello@ewnsolutions.com" aria-label="Email EWN Solutions"><Mail size={18} /></a>
+            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer" aria-label="EWN Solutions on LinkedIn"><Linkedin size={18} /></a>
+            <a href="https://www.facebook.com" target="_blank" rel="noreferrer" aria-label="EWN Solutions on Facebook"><Facebook size={18} /></a>
+            <a href="https://www.instagram.com" target="_blank" rel="noreferrer" aria-label="EWN Solutions on Instagram"><Instagram size={18} /></a>
+          </div>
         </div>
         <div>
           <h2>Explore</h2>
           <Link to="/features">Features</Link>
           <Link to="/how-it-works">How it works</Link>
-          <Link to="/pricing">Proposed pricing</Link>
+          <Link to="/pricing">Pricing</Link>
           <Link to="/demo">Guided demo</Link>
         </div>
         <div>
@@ -90,12 +96,12 @@ export function Footer() {
         <div className="footer-note">
           <span className="footer-product">Featured product</span>
           <strong>EWN Inventory</strong>
-          <p>A proposed inventory management experience. Currently a prototype concept.</p>
+          <p>A sample stock management product.</p>
         </div>
       </div>
       <div className="container footer-bottom">
         <span>© {new Date().getFullYear()} EWN Solutions</span>
-        <span>Prototype website · No live inventory service</span>
+        <span>Smart stock for growing businesses</span>
       </div>
     </footer>
   );
@@ -106,35 +112,35 @@ export function Layout({ children }: { children: ReactNode }) {
   const metadata: Record<string, { title: string; description: string }> = {
     '/': {
       title: 'EWN Solutions — Smart Solutions. Better Business.',
-      description: 'EWN Solutions builds practical digital products for everyday business challenges. Explore the EWN Inventory prototype.',
+      description: 'EWN Solutions builds simple digital tools for daily business work. Explore the EWN Inventory demo.',
     },
     '/features': {
       title: 'Features — EWN Solutions',
-      description: 'Explore the proposed EWN Inventory capabilities for product organization, stock tracking, replenishment, and reports.',
+      description: 'See EWN Inventory features for products, stock, orders, and reports.',
     },
     '/how-it-works': {
       title: 'How It Works — EWN Solutions',
-      description: 'Follow a proposed inventory workflow from product setup and stock movements to reports and replenishment planning.',
+      description: 'Follow the simple stock process from product setup to the next order.',
     },
     '/pricing': {
-      title: 'Proposed Pricing — EWN Solutions',
-      description: 'Review illustrative EWN Inventory plan concepts in ETB. The prototype is not available for purchase.',
+      title: 'Pricing — EWN Solutions',
+      description: 'Compare EWN Inventory plans and choose the option that fits your business.',
     },
     '/about': {
       title: 'About — EWN Solutions',
-      description: 'Learn about EWN Solutions and its mission to create practical digital products for everyday business challenges.',
+      description: 'Learn about EWN Solutions and the simple digital tools we want to build.',
     },
     '/contact': {
       title: 'Contact — EWN Solutions',
-      description: 'Contact EWN Solutions with a question about the EWN Inventory product concept or guided demo.',
+      description: 'Contact EWN Solutions about EWN Inventory or the demo.',
     },
     '/login': {
       title: 'Sign In — EWN Solutions',
-      description: 'The EWN Inventory sign-in experience is a prototype and is not connected to authentication.',
+      description: 'Sign in to your EWN Inventory account.',
     },
     '/demo': {
       title: 'Guided Demo — EWN Inventory',
-      description: 'Meet a fictional shop and preview the planned guided learning experience for EWN Inventory.',
+      description: 'Follow the 5E learning model in a sample car oil and parts shop.',
     },
   };
   const currentMetadata = metadata[location.pathname] ?? {

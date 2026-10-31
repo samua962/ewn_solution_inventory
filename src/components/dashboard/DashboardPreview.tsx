@@ -26,7 +26,7 @@ export function MetricCard({
 
 export function DashboardPreview({ large = false }: { large?: boolean }) {
   return (
-    <section className={`dashboard-preview${large ? ' dashboard-large' : ''}`} aria-label="Illustrative inventory dashboard preview">
+    <section className={`dashboard-preview${large ? ' dashboard-large' : ''}`} aria-label="EWN Inventory dashboard preview">
       <div className="dashboard-sidebar">
         <div className="dashboard-logo"><span><Warehouse size={18} /></span><strong>ewn inventory</strong></div>
         <div className="dashboard-caption">WORKSPACE</div>
@@ -34,7 +34,7 @@ export function DashboardPreview({ large = false }: { large?: boolean }) {
         <div className="dashboard-nav"><Package size={15} /> Products</div>
         <div className="dashboard-nav"><ClipboardCheck size={15} /> Movements</div>
         <div className="dashboard-nav"><BarChart3 size={15} /> Reports</div>
-        <div className="sidebar-bottom"><span className="avatar">EW</span><span><b>Sample store</b><small>Illustrative data</small></span></div>
+        <div className="sidebar-bottom"><span className="avatar">EW</span><span><b>My store</b><small>Sample data</small></span></div>
       </div>
       <div className="dashboard-main">
         <div className="dashboard-topbar">
@@ -47,13 +47,13 @@ export function DashboardPreview({ large = false }: { large?: boolean }) {
         <div className="dashboard-date">A sample view of inventory at a glance</div>
         <div className="metric-grid">
           <MetricCard label="Total products" value="248" detail="Across 8 categories" icon={Package} />
-          <MetricCard label="Inventory value" value="ETB 184,500" detail="Illustrative estimate" icon={BarChart3} tone="green" />
+          <MetricCard label="Inventory value" value="ETB 184,500" detail="Current value" icon={BarChart3} tone="green" />
           <MetricCard label="Low-stock items" value="12" detail="Review suggested" icon={BellRing} tone="amber" />
         </div>
         <div className="dashboard-content-grid">
           <div className="dashboard-panel chart-panel">
             <div className="panel-title"><span><b>Stock movement</b><small>Example activity · last 7 days</small></span><span className="panel-menu">•••</span></div>
-            <div className="chart-area" aria-label="Illustrative bar chart showing stock activity">
+            <div className="chart-area" aria-label="Bar chart showing stock activity">
               <div className="chart-y-labels"><span>80</span><span>60</span><span>40</span><span>20</span></div>
               <div className="chart-columns">
                 {[42, 63, 49, 78, 57, 91, 67].map((height, index) => (
@@ -67,7 +67,7 @@ export function DashboardPreview({ large = false }: { large?: boolean }) {
             </div>
           </div>
           <div className="dashboard-panel movements-panel">
-            <div className="panel-title"><span><b>Recent movements</b><small>Illustrative sample</small></span><span className="panel-link">View all</span></div>
+            <div className="panel-title"><span><b>Recent movements</b><small>Today</small></span><span className="panel-link">View all</span></div>
             {stockMovements.slice(0, 2).map((movement) => (
               <div className="movement-row" key={movement.product}>
                 <span className={`movement-icon ${movement.action === 'Stock received' ? 'received' : 'issued'}`}>
@@ -97,7 +97,7 @@ export function DashboardPreview({ large = false }: { large?: boolean }) {
             </table>
           </div>
         </div>
-        <p className="dashboard-disclaimer">Illustrative interface and sample data only · Not a live inventory service</p>
+        <p className="dashboard-disclaimer">Sample dashboard data</p>
       </div>
     </section>
   );
