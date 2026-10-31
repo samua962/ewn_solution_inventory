@@ -81,7 +81,7 @@ p { color: var(--color-text-secondary); }
 .site-header { position: relative; z-index: 10; background: rgba(255,255,255,.97); border-bottom: 1px solid var(--color-border); }
 .nav-wrap { min-height: 78px; display: flex; align-items: center; justify-content: space-between; gap: 30px; }
 .brand { display: inline-flex; align-items: center; flex-shrink: 0; }
-.brand-image { display: block; width: 72px; height: 72px; object-fit: contain; border-radius: 6px; background: white; }
+.brand-image { display: block; width: 168px; height: 58px; object-fit: contain; object-position: left center; border-radius: 0; background: transparent; }
 .primary-nav { display: flex; align-items: center; gap: clamp(14px, 2vw, 25px); }
 .nav-link, .nav-signin { color: #42516a; font-size: 13px; font-weight: 600; transition: color .18s ease; }
 .nav-link:hover, .nav-signin:hover, .nav-link.active, .nav-signin.active { color: var(--color-primary); }
@@ -452,7 +452,8 @@ p { color: var(--color-text-secondary); }
 
 .site-footer { padding-top: 53px; color: white; background: var(--color-navy); }
 .footer-grid { display: grid; grid-template-columns: 1.2fr .65fr .65fr 1fr; gap: 45px; padding-bottom: 39px; }
-.brand-light .brand-image { width: 94px; height: 94px; }
+.brand-light { width: 180px; height: 68px; }
+.brand-light .brand-image { width: 180px; height: 68px; object-fit: contain; object-position: left center; border-radius: 4px; background: white; }
 .footer-brand > p { max-width: 255px; margin: 17px 0 12px; color: #c3d2e3; font-size: 11px; }
 .footer-tagline { color: #e4effb; font-size: 10px; font-weight: 700; }
 .footer-socials { display: flex; gap: 9px; margin-top: 16px; }
@@ -525,7 +526,7 @@ p { color: var(--color-text-secondary); }
   .section-padded { padding-block: 58px; }
   .nav-wrap { min-height: 66px; }
   .primary-nav { top: 65px; }
-  .brand-image { width: 64px; height: 64px; }
+  .brand-image { width: 148px; height: 64px; }
   .hero-section { padding-block: 45px 43px; }
   .hero-copy h1 { font-size: clamp(2.4rem, 11vw, 3.3rem); }
   .hero-lead { font-size: 14px; }
@@ -739,7 +740,7 @@ body {
 }
 
 .brand-image {
-  width: 58px;
+  width: 168px;
   height: 58px;
 }
 
@@ -886,8 +887,9 @@ body {
   gap: 36px;
 }
 
+.brand-light,
 .brand-light .brand-image {
-  width: 68px;
+  width: 180px;
   height: 68px;
 }
 
@@ -901,7 +903,7 @@ body {
   }
 
   .brand-image {
-    width: 54px;
+    width: 148px;
     height: 54px;
   }
 
