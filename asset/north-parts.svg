@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 48" role="img" aria-labelledby="title">
+  <title id="title">Meseret Pharmacy</title>
+  <rect x="5" y="9" width="34" height="34" rx="8" fill="#eaf4ff"/>
+  <path fill="#2377c9" d="M18 14h8v7h7v8h-7v8h-8v-8h-7v-8h7v-7Z"/>
+  <text x="46" y="26" fill="#2377c9" font-family="Arial,sans-serif" font-size="13" font-weight="700">MESERET</text>
+  <text x="46" y="39" fill="#777" font-family="Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="2">PHARMACY</text>
+</svg>

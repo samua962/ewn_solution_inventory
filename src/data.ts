@@ -49,12 +49,12 @@ export const features: Feature[] = [
   },
   {
     title: 'Stock tracking',
-    description: 'Track oil and parts received or sold.',
+    description: 'Track products received, sold, or moved.',
     icon: PackageCheck,
   },
   {
     title: 'Low-stock alerts',
-    description: 'See oil and parts that are running low.',
+    description: 'See products that are running low.',
     icon: BellRing,
   },
   {

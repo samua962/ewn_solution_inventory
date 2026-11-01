@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 48" role="img" aria-labelledby="title">
+  <title id="title">Shola Market</title>
+  <path fill="#16834b" d="M7 15h28l-3 23H10l-3-23Zm7 3v20h2V18h-2Zm8 0v20h2V18h-2Zm8 0v20h2V18h-2Z"/>
+  <path fill="#16834b" d="M8 15c0-5 4-9 9-9 1 6-1 8-9 9Zm10-9c5 0 9 4 9 9-7-1-9-3-9-9Zm10 9c5-2 8-7 8-12 4 6 0 12-8 12Z"/>
+  <text x="51" y="26" fill="#123b70" font-family="Arial,sans-serif" font-size="13" font-weight="700">SHOLA</text>
+  <text x="51" y="39" fill="#16834b" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="2">MARKET</text>
+</svg>

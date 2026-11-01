@@ -1,9 +1,17 @@
-import { ArrowRight, BarChart3, BellRing, Compass, PackageCheck, ShieldCheck, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowRight, BarChart3, BellRing, Bot, Compass, PackageCheck, Send, ShieldCheck, TrendingUp, X } from 'lucide-react';
 import { features } from '../data';
-import { DashboardPreview } from '../components/dashboard/DashboardPreview';
 import { ButtonLink, Eyebrow, FeatureCard, FinalCta, SectionHeading } from '../components/ui';
+import autoShopImage from '../../asset/auto-shop.jpg';
+import customerProductsImage from '../../asset/customer-products.jpg';
+import trustedWorkshopImage from '../../asset/trusted-workshop.jpg';
+import sholaMarketLogo from '../../asset/atlas-auto.svg';
+import meseretPharmacyLogo from '../../asset/north-parts.svg';
+import boleElectronicsLogo from '../../asset/green-valley.svg';
+import addisHardwareLogo from '../../asset/vertex-supply.svg';
 
 export function HomePage() {
+  const [assistantOpen, setAssistantOpen] = useState(false);
   const benefits = [
     { title: 'Track stock', icon: PackageCheck },
     { title: 'See stock levels', icon: Compass },
@@ -15,21 +23,28 @@ export function HomePage() {
       <section className="hero-section">
         <div className="container hero-grid">
           <div className="hero-copy">
-            <Eyebrow>EWN Inventory</Eyebrow>
-            <h1>Know what oil and parts are in stock.</h1>
-            <p className="hero-lead">A simple stock system for car oil and spare-parts shops.</p>
+            <Eyebrow>Simple inventory software</Eyebrow>
+            <h1>Know your stock. Serve faster. Grow with confidence.</h1>
+            <p className="hero-lead">Manage products, sales, and stock in one clear system made for shops, pharmacies, supermarkets, and growing businesses.</p>
             <div className="hero-actions">
               <ButtonLink to="/demo">Explore the demo <ArrowRight size={17} /></ButtonLink>
               <ButtonLink to="/features" variant="secondary">See features</ButtonLink>
             </div>
             <p className="hero-promise"><ShieldCheck size={16} /> Easy to see and easy to use.</p>
-            <span className="hero-prototype">Dashboard preview</span>
+            <span className="hero-prototype">Start with one store. Grow to more locations.</span>
           </div>
           <div className="hero-visual">
             <div className="visual-orbit orbit-one" />
             <div className="visual-orbit orbit-two" />
-            <DashboardPreview />
-            <div className="floating-note"><span className="floating-note-icon"><BellRing size={17} /></span><span><b>Stock to review</b><small>5W-30 oil</small></span></div>
+            <div className="hero-product-story">
+              <img src={customerProductsImage} alt="Products managed with EWN Inventory" />
+              <div className="hero-product-overlay">
+                <span>Today’s stock</span>
+                <strong>All products, in one place</strong>
+              </div>
+              <div className="hero-stock-pill"><span>248</span><small>products tracked</small></div>
+            </div>
+            <div className="floating-note"><span className="floating-note-icon"><BellRing size={17} /></span><span><b>Stock to review</b><small>Low-stock products</small></span></div>
           </div>
         </div>
       </section>
@@ -37,6 +52,41 @@ export function HomePage() {
       <section className="benefit-strip">
         <div className="container benefit-grid">
           {benefits.map(({ title, icon: Icon }) => <div className="benefit-item" key={title}><Icon size={20} /><span>{title}</span></div>)}
+        </div>
+      </section>
+
+      <section className="section excitement-section">
+        <div className="container section-padded">
+          <div className="excitement-grid">
+            <div className="excitement-copy">
+              <Eyebrow>One system, many businesses</Eyebrow>
+              <h2>Manage every product with less work.</h2>
+              <p>Retail shops, spare-parts stores, suppliers, and service businesses can keep products and stock in one place.</p>
+              <div className="excitement-result"><strong>Less guesswork.</strong><span>See what is selling and what needs to be ordered.</span></div>
+              <div className="excitement-highlights"><span>Product photos</span><span>Clear stock levels</span><span>Fast selling</span></div>
+              <ButtonLink to="/demo" variant="secondary">See EWN Inventory <ArrowRight size={16} /></ButtonLink>
+            </div>
+            <div className="customer-gallery">
+              <figure className="gallery-large"><img src={autoShopImage} alt="Automotive products in a workshop" /><figcaption>Example: auto parts shop</figcaption></figure>
+              <figure><img src={customerProductsImage} alt="Products managed with inventory software" /><figcaption>Products customers buy</figcaption></figure>
+              <figure><img src={trustedWorkshopImage} alt="Busy automotive service business" /><figcaption>Example: service business</figcaption></figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="trusted-section" aria-label="Our customers and their products">
+        <div className="container trusted-inner">
+          <div className="customer-showcase-heading">
+            <span>Our customers</span>
+            <small>Everyday businesses, one simple system</small>
+          </div>
+          <div className="partner-logos customer-products" aria-label="Customer products">
+            <strong><img src={sholaMarketLogo} alt="Shola Market logo" /><span>Shola Market<small>Food and groceries</small></span></strong>
+            <strong><img src={meseretPharmacyLogo} alt="Meseret Pharmacy logo" /><span>Meseret Pharmacy<small>Medicine and care</small></span></strong>
+            <strong><img src={boleElectronicsLogo} alt="Bole Electronics logo" /><span>Bole Electronics<small>Phones and devices</small></span></strong>
+            <strong><img src={addisHardwareLogo} alt="Addis Hardware logo" /><span>Addis Hardware<small>Building materials</small></span></strong>
+          </div>
         </div>
       </section>
 
@@ -59,6 +109,18 @@ export function HomePage() {
           <div className="section-center"><ButtonLink to="/how-it-works" variant="text">See the workflow <ArrowRight size={16} /></ButtonLink></div>
         </div>
       </section>
+
+      <button className={`assistant-button${assistantOpen ? ' is-open' : ''}`} type="button" onClick={() => setAssistantOpen((open) => !open)} aria-expanded={assistantOpen} aria-label={assistantOpen ? 'Close AI assistant' : 'Open AI assistant'}>
+        {assistantOpen ? <X size={20} /> : <><Bot size={21} /><span>Ask AI assistant</span></>}
+      </button>
+      {assistantOpen && (
+        <aside className="assistant-panel" aria-label="EWN AI assistant">
+          <div className="assistant-head"><span><Bot size={19} /></span><div><strong>EWN Assistant</strong><small>Ready to help</small></div></div>
+          <div className="assistant-message">Hello. I can help you learn about products, stock levels, sales, and reports.</div>
+          <div className="assistant-chips"><button type="button">How does stock work?</button><button type="button">Show inventory features</button></div>
+          <label className="assistant-input"><input aria-label="Ask the assistant" placeholder="Type your question..." /><button type="button" aria-label="Send question"><Send size={17} /></button></label>
+        </aside>
+      )}
 
       <FinalCta />
     </>

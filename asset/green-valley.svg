@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 48" role="img" aria-labelledby="title">
+  <title id="title">Bole Electronics</title>
+  <rect x="5" y="8" width="38" height="30" rx="4" fill="#253d62"/>
+  <rect x="10" y="13" width="28" height="20" rx="2" fill="#eef5ff"/>
+  <path fill="#287bd3" d="M16 22h16v5H16z"/>
+  <path fill="#253d62" d="M19 39h10l2 4H17l2-4Z"/>
+  <text x="50" y="25" fill="#253d62" font-family="Arial,sans-serif" font-size="13" font-weight="700">BOLE</text>
+  <text x="50" y="38" fill="#777" font-family="Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="2">ELECTRONICS</text>
+</svg>

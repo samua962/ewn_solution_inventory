@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 48" role="img" aria-labelledby="title">
+  <title id="title">Addis Hardware</title>
+  <path fill="#c97925" d="M5 38V18l10-10h18l10 10v20h-9v-9H14v9H5Zm9-16h20l-5-5H19l-5 5Z"/>
+  <rect x="19" y="25" width="10" height="13" fill="#fff"/>
+  <text x="50" y="25" fill="#343f4b" font-family="Arial,sans-serif" font-size="13" font-weight="700">ADDIS</text>
+  <text x="50" y="38" fill="#777" font-family="Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="2">HARDWARE</text>
+</svg>
