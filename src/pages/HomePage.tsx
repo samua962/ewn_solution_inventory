@@ -1,10 +1,8 @@
 import { useState } from 'react';
-import { ArrowRight, BarChart3, BellRing, Bot, Compass, PackageCheck, Send, ShieldCheck, TrendingUp, X } from 'lucide-react';
+import { ArrowRight, BarChart3, BellRing, Bot, Boxes, Compass, PackageCheck, Send, ShieldCheck, TrendingUp, Truck, X } from 'lucide-react';
 import { features } from '../data';
+import { DashboardPreview } from '../components/dashboard/DashboardPreview';
 import { ButtonLink, Eyebrow, FeatureCard, FinalCta, SectionHeading } from '../components/ui';
-import autoShopImage from '../../asset/auto-shop.jpg';
-import customerProductsImage from '../../asset/customer-products.jpg';
-import trustedWorkshopImage from '../../asset/trusted-workshop.jpg';
 import sholaMarketLogo from '../../asset/atlas-auto.svg';
 import meseretPharmacyLogo from '../../asset/north-parts.svg';
 import boleElectronicsLogo from '../../asset/green-valley.svg';
@@ -24,8 +22,8 @@ export function HomePage() {
         <div className="container hero-grid">
           <div className="hero-copy">
             <Eyebrow>Simple inventory software</Eyebrow>
-            <h1>Know your stock. Serve faster. Grow with confidence.</h1>
-            <p className="hero-lead">Manage products, sales, and stock in one clear system made for shops, pharmacies, supermarkets, and growing businesses.</p>
+            <h1>Take Control of Your Inventory. Grow Your Business.</h1>
+            <p className="hero-lead">Manage products, monitor stock levels, track inventory movements, and make smarter purchasing decisions with a simple inventory management experience built for growing businesses.</p>
             <div className="hero-actions">
               <ButtonLink to="/demo">Explore the demo <ArrowRight size={17} /></ButtonLink>
               <ButtonLink to="/features" variant="secondary">See features</ButtonLink>
@@ -34,17 +32,7 @@ export function HomePage() {
             <span className="hero-prototype">Start with one store. Grow to more locations.</span>
           </div>
           <div className="hero-visual">
-            <div className="visual-orbit orbit-one" />
-            <div className="visual-orbit orbit-two" />
-            <div className="hero-product-story">
-              <img src={customerProductsImage} alt="Products managed with EWN Inventory" />
-              <div className="hero-product-overlay">
-                <span>Today’s stock</span>
-                <strong>All products, in one place</strong>
-              </div>
-              <div className="hero-stock-pill"><span>248</span><small>products tracked</small></div>
-            </div>
-            <div className="floating-note"><span className="floating-note-icon"><BellRing size={17} /></span><span><b>Stock to review</b><small>Low-stock products</small></span></div>
+            <DashboardPreview />
           </div>
         </div>
       </section>
@@ -66,10 +54,11 @@ export function HomePage() {
               <div className="excitement-highlights"><span>Product photos</span><span>Clear stock levels</span><span>Fast selling</span></div>
               <ButtonLink to="/demo" variant="secondary">See EWN Inventory <ArrowRight size={16} /></ButtonLink>
             </div>
-            <div className="customer-gallery">
-              <figure className="gallery-large"><img src={autoShopImage} alt="Automotive products in a workshop" /><figcaption>Example: auto parts shop</figcaption></figure>
-              <figure><img src={customerProductsImage} alt="Products managed with inventory software" /><figcaption>Products customers buy</figcaption></figure>
-              <figure><img src={trustedWorkshopImage} alt="Busy automotive service business" /><figcaption>Example: service business</figcaption></figure>
+            <div className="business-product-grid">
+              <div><PackageCheck size={22} /><strong>Products</strong><span>Keep every item organized</span></div>
+              <div><Boxes size={22} /><strong>Stock</strong><span>Know quantities at a glance</span></div>
+              <div><TrendingUp size={22} /><strong>Sales</strong><span>See what customers buy</span></div>
+              <div><Truck size={22} /><strong>Orders</strong><span>Restock before items run out</span></div>
             </div>
           </div>
         </div>
