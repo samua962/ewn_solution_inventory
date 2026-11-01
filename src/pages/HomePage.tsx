@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, BarChart3, BellRing, Bot, Boxes, Compass, PackageCheck, Send, ShieldCheck, TrendingUp, Truck, X } from 'lucide-react';
+import { ArrowRight, BarChart3, Bot, Boxes, Compass, PackageCheck, Send, ShieldCheck, TrendingUp, Truck, X } from 'lucide-react';
 import { features } from '../data';
 import { DashboardPreview } from '../components/dashboard/DashboardPreview';
 import { ButtonLink, Eyebrow, FeatureCard, FinalCta, SectionHeading } from '../components/ui';

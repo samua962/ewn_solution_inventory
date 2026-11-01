@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { BarChart3, Boxes, ChevronRight, CircleGauge, Download, Menu, Minus, PackagePlus, Plus, Printer, Search, ShoppingCart, Trash2, Users, X } from 'lucide-react';
+import { BarChart3, Bell, Boxes, ChevronRight, CircleGauge, Download, Menu, Minus, PackagePlus, Plus, Printer, Search, ShoppingCart, Trash2, Users, X } from 'lucide-react';
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { useInventory, type Product } from './InventoryStore';
 import { useNavigate } from 'react-router-dom';
@@ -23,7 +23,10 @@ function statusFor(product: Product) {
 
 export function InventoryShell() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const navigate = useNavigate();
+  const { products } = useInventory();
+  const lowStockProducts = products.filter((product) => product.stock <= product.reorderLevel);
   const savedUser = localStorage.getItem('ewn-demo-user');
   const user = savedUser ? JSON.parse(savedUser) as { name: string; role: UserRole } : null;
   if (!user) {
@@ -49,6 +52,23 @@ export function InventoryShell() {
         <header className="inventory-topbar">
           <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu"><Menu /></button>
           <div><strong>Selam Auto Parts Shop</strong><small>Inventory workspace</small></div>
+          <div className="inventory-notifications">
+            <button className="notification-button" type="button" aria-label="Open notifications" aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen((open) => !open)}>
+              <Bell size={21} />
+              {lowStockProducts.length > 0 && <span className="notification-count">{lowStockProducts.length}</span>}
+            </button>
+            {notificationsOpen && (
+              <div className="notification-panel">
+                <div className="notification-panel-head"><strong>Notifications</strong><span>{lowStockProducts.length} alerts</span></div>
+                {lowStockProducts.length ? lowStockProducts.slice(0, 5).map((product) => (
+                  <button key={product.id} type="button" className="notification-item" onClick={() => { setNotificationsOpen(false); navigate('/app/products'); }}>
+                    <span className="notification-dot" />
+                    <span><strong>{product.name}</strong><small>{product.stock === 0 ? 'Out of stock' : `${product.stock} units remaining`}</small></span>
+                  </button>
+                )) : <p className="notification-empty">No new stock alerts.</p>}
+              </div>
+            )}
+          </div>
           <span className="inventory-avatar">{user.name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()}</span>
         </header>
         <main>
