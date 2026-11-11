@@ -11,11 +11,12 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { Route, Routes } from 'react-router-dom';
 import { InventoryShell } from './components/inventory/InventoryShell';
 import { InventoryProvider } from './components/inventory/InventoryStore';
+import { LanguageProvider } from './i18n';
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/app/*" element={<InventoryProvider><InventoryShell /></InventoryProvider>} />
+      <Route path="/app/*" element={<LanguageProvider><InventoryProvider><InventoryShell /></InventoryProvider></LanguageProvider>} />
       <Route path="*" element={
         <Layout>
           <Routes>

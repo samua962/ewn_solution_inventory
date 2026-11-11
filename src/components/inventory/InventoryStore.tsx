@@ -25,9 +25,10 @@ export type Movement = {
   type: 'Stock received' | 'Stock sold' | 'Stock adjusted';
   quantity: number;
   date: string;
+  performedBy?: string;
 };
 
-export type Sale = { id: number; productId: number; quantity: number; total: number; date: string };
+export type Sale = { id: number; productId: number; quantity: number; total: number; date: string; performedBy?: string };
 
 const initialProducts: Product[] = [
   { id: 1, name: 'Engine oil 5W-30 · 4 L', category: 'Engine oil', sku: 'EO-5304', stock: 18, reorderLevel: 12, price: 3450 },
@@ -95,6 +96,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       type: 'Stock sold',
       quantity: sale.quantity,
       date: 'Just now',
+      performedBy: sale.performedBy,
     }, ...current]);
   }
 
