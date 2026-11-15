@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { BarChart3, Bell, Bot, Boxes, ChevronRight, CircleGauge, Download, LockKeyhole, Menu, Minus, PackagePlus, Plus, Printer, RotateCcw, Search, Send, ShoppingCart, Sparkles, Trash2, Users, X } from 'lucide-react';
+import { ArrowLeft, BarChart3, Bell, Bot, Boxes, CalendarDays, ChevronRight, CircleGauge, Download, LockKeyhole, Menu, Minus, PackagePlus, Plus, Printer, RotateCcw, Search, Send, ShoppingCart, Sparkles, Trash2, Users, X } from 'lucide-react';
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
-import { useInventory, type Product } from './InventoryStore';
+import { useInventory, type Product, type PurchaseOrderItem } from './InventoryStore';
 import { useNavigate } from 'react-router-dom';
 import { demoUsers, type UserRole } from './InventoryStore';
 import { useLanguage } from '../../i18n';
@@ -264,7 +264,7 @@ function Dashboard() {
         <div className="inventory-movement-list">
           {movements.slice(0, 5).map((movement) => {
             const product = products.find((item) => item.id === movement.productId);
-            return <div key={movement.id}><span className={`movement-dot ${movement.type === 'Stock sold' ? 'sold' : ''}`} /><div><strong>{product?.name ?? t('Product')}</strong><small>{t(movement.type)} · {t('by')} {movement.performedBy ?? t('Not recorded')}</small></div><b>{movement.type === 'Stock sold' ? '-' : '+'}{movement.quantity}</b><time>{t(movement.date)}</time></div>;
+            return <div key={movement.id}><span className={`movement-dot ${movement.type === 'Stock sold' ? 'sold' : ''}`} /><div><strong>{product?.name ?? t('Product')}</strong><small>{t(movement.type)} · {t('by')} {movement.performedBy ?? t('Not recorded')}{movement.orderNumber ? ` · ${movement.orderNumber}` : ''}</small></div><b>{movement.type === 'Stock sold' ? '-' : '+'}{movement.quantity}</b><time>{t(movement.date)}</time></div>;
           })}
         </div>
       </section>
@@ -349,7 +349,7 @@ function MovementsPage() {
       <label>{t('Quantity')}<input type="number" min="1" value={quantity} onChange={(event) => setQuantity(event.target.value)} /></label>
       <button className="inventory-primary" type="submit">{t('Save movement')}</button>
     </form>
-    <section className="inventory-panel"><div className="inventory-panel-head"><div><h2>{t('Movement history')}</h2></div></div><div className="inventory-table-wrap"><table className="inventory-table"><thead><tr><th>{t('Product')}</th><th>{t('Movement')}</th><th>{t('Quantity')}</th><th>{t('Performed by')}</th><th>{t('Date')}</th></tr></thead><tbody>{movements.map((movement) => <tr key={movement.id}><td>{products.find((product) => product.id === movement.productId)?.name ?? t('Product')}</td><td>{t(movement.type)}</td><td>{movement.quantity}</td><td>{movement.performedBy ?? t('Not recorded')}</td><td>{t(movement.date)}</td></tr>)}</tbody></table></div></section>
+    <section className="inventory-panel"><div className="inventory-panel-head"><div><h2>{t('Movement history')}</h2></div></div><div className="inventory-table-wrap"><table className="inventory-table"><thead><tr><th>{t('Product')}</th><th>{t('Movement')}</th><th>{t('Quantity')}</th><th>{t('Performed by')}</th><th>{t('Date')}</th></tr></thead><tbody>{movements.map((movement) => <tr key={movement.id}><td>{products.find((product) => product.id === movement.productId)?.name ?? t('Product')}</td><td>{t(movement.type)}{movement.orderNumber && <small className="movement-order-reference">{t('Purchase order')} {movement.orderNumber}</small>}</td><td>{movement.quantity}</td><td>{movement.performedBy ?? t('Not recorded')}</td><td>{t(movement.date)}</td></tr>)}</tbody></table></div></section>
   </>;
 }
 
@@ -357,13 +357,126 @@ type MovementType = 'Stock received' | 'Stock sold' | 'Stock adjusted';
 
 function OrdersPage() {
   const { t } = useLanguage();
-  const orders = [
-    { number: 'PO-1048', supplier: 'Addis Auto Supply', items: 4, date: '28 Oct 2026', total: 'ETB 38,500', status: 'Ordered' },
-    { number: 'PO-1042', supplier: 'Mekonnen Oils', items: 3, date: '24 Oct 2026', total: 'ETB 21,800', status: 'Received' },
-  ];
+  const { products, purchaseOrders, createPurchaseOrder, placePurchaseOrder, receivePurchaseOrder } = useInventory();
+  const [creating, setCreating] = useState(false);
+  const [supplier, setSupplier] = useState('');
+  const [expectedDate, setExpectedDate] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 7);
+    return date.toISOString().slice(0, 10);
+  });
+  const [notes, setNotes] = useState('');
+  const [items, setItems] = useState<PurchaseOrderItem[]>(() => products[0] ? [{ productId: products[0].id, quantity: 1, unitCost: 0 }] : []);
+  const [formError, setFormError] = useState('');
+  const [pendingReceiveId, setPendingReceiveId] = useState<number | null>(null);
+  const [notice, setNotice] = useState('');
+  const formRef = useRef<HTMLFormElement>(null);
+  const savedUser = localStorage.getItem('ewn-demo-user');
+  const user = savedUser ? JSON.parse(savedUser) as { name?: string } : null;
+  const total = items.reduce((sum, item) => sum + item.quantity * item.unitCost, 0);
+
+  function openForm() {
+    setSupplier('');
+    setNotes('');
+    setFormError('');
+    setItems(products[0] ? [{ productId: products[0].id, quantity: 1, unitCost: 0 }] : []);
+    setCreating(true);
+  }
+
+  function updateItem(index: number, patch: Partial<PurchaseOrderItem>) {
+    setItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item));
+  }
+
+  function createOrder(status: 'Draft' | 'Ordered') {
+    if (!formRef.current?.reportValidity()) return;
+    if (!supplier.trim() || !items.length || items.some((item) => item.quantity < 1 || item.unitCost <= 0)) {
+      setFormError(t('Add a supplier and at least one valid product line.'));
+      return;
+    }
+    createPurchaseOrder({ supplier: supplier.trim(), items, expectedDate, notes: notes.trim(), status, createdBy: user?.name ?? 'Unknown user' });
+    setCreating(false);
+    setNotice(status === 'Draft' ? t('Draft saved.') : t('Purchase order placed. Stock will update when items are received.'));
+  }
+
+  function receiveOrder(id: number) {
+    receivePurchaseOrder(id, user?.name ?? 'Unknown user');
+    setPendingReceiveId(null);
+    setNotice(t('Items received. Product stock and movement history have been updated.'));
+  }
+
+  function formatDate(value: string) {
+    return new Date(`${value.slice(0, 10)}T00:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  if (creating) {
+    return <>
+      <div className="inventory-page-title purchase-order-title">
+        <div><button className="inventory-back-button" type="button" onClick={() => setCreating(false)}><ArrowLeft size={17} /> {t('Back to orders')}</button><h1>{t('Create purchase order')}</h1><p>{t('Add supplier and product details. Stock updates only after you receive the order.')}</p></div>
+      </div>
+      <form className="purchase-order-layout" ref={formRef} onSubmit={(event) => event.preventDefault()}>
+        <div className="purchase-order-main">
+          <section className="inventory-panel purchase-order-section">
+            <div className="purchase-section-heading"><span>1</span><div><h2>{t('Supplier and delivery')}</h2><p>{t('Who are you ordering from, and when should it arrive?')}</p></div></div>
+            <div className="purchase-order-fields">
+              <label>{t('Supplier name')}<input value={supplier} onChange={(event) => setSupplier(event.target.value)} placeholder={t('e.g. Addis Auto Supply')} required /></label>
+              <label>{t('Expected delivery date')}<input type="date" min={new Date().toISOString().slice(0, 10)} value={expectedDate} onChange={(event) => setExpectedDate(event.target.value)} required /></label>
+              <label className="purchase-notes-field">{t('Notes')} <span>{t('(optional)')}</span><textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder={t('Add delivery instructions or order notes')} rows={3} /></label>
+            </div>
+          </section>
+          <section className="inventory-panel purchase-order-section">
+            <div className="purchase-section-heading"><span>2</span><div><h2>{t('Products to order')}</h2><p>{t('Choose products and enter the ordered quantity and unit cost.')}</p></div><button type="button" className="inventory-secondary purchase-add-line" onClick={() => products[0] && setItems((current) => [...current, { productId: products[0].id, quantity: 1, unitCost: 0 }])} disabled={!products.length}><Plus size={16} /> {t('Add product')}</button></div>
+            {!items.length ? <p className="inventory-empty">{t('Add products before saving this order.')}</p> : <div className="inventory-table-wrap"><table className="inventory-table purchase-items-table"><thead><tr><th>{t('Product')}</th><th>{t('Quantity')}</th><th>{t('Unit cost (ETB)')}</th><th>{t('Line total')}</th><th /></tr></thead><tbody>{items.map((item, index) => {
+              const product = products.find((entry) => entry.id === item.productId);
+              return <tr key={`${index}-${item.productId}`}>
+                <td><select aria-label={t('Product')} value={item.productId} onChange={(event) => updateItem(index, { productId: Number(event.target.value) })}>{products.map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}</select></td>
+                <td><input aria-label={t('Quantity')} type="number" min="1" value={item.quantity} onChange={(event) => updateItem(index, { quantity: Number(event.target.value) })} required /></td>
+                <td><input aria-label={t('Unit cost (ETB)')} type="number" min="0.01" step="0.01" value={item.unitCost} onChange={(event) => updateItem(index, { unitCost: Number(event.target.value) })} required /></td>
+                <td>ETB {(item.quantity * item.unitCost).toLocaleString()}</td>
+                <td><button className="purchase-remove-line" type="button" aria-label={`${t('Remove product')} ${product?.name ?? t('Product')}`} onClick={() => setItems((current) => current.filter((_, itemIndex) => itemIndex !== index))}><Trash2 size={17} /></button></td>
+              </tr>;
+            })}</tbody></table></div>}
+          </section>
+        </div>
+        <aside className="purchase-order-summary inventory-panel">
+          <div className="purchase-section-heading"><span>3</span><div><h2>{t('Order summary')}</h2><p>{t('Review before saving.')}</p></div></div>
+          <div className="purchase-summary-row"><span>{t('Products')}</span><strong>{items.length}</strong></div>
+          <div className="purchase-summary-row"><span>{t('Total units')}</span><strong>{items.reduce((sum, item) => sum + item.quantity, 0)}</strong></div>
+          <div className="purchase-summary-total"><span>{t('Estimated total')}</span><strong>ETB {total.toLocaleString()}</strong></div>
+          <div className="purchase-summary-date"><CalendarDays size={17} /><span>{t('Expected by')} <strong>{formatDate(expectedDate)}</strong></span></div>
+          {formError && <p className="purchase-form-error" role="alert">{formError}</p>}
+          <div className="purchase-form-actions">
+            <button type="button" className="inventory-secondary" onClick={() => createOrder('Draft')}>{t('Save as draft')}</button>
+            <button type="button" className="inventory-primary" onClick={() => createOrder('Ordered')}><ShoppingCart size={17} /> {t('Place order')}</button>
+          </div>
+          <p className="purchase-stock-note">{t('Placing an order does not change stock. Stock updates only when you mark items received.')}</p>
+        </aside>
+      </form>
+    </>;
+  }
+
   return <>
-    <div className="inventory-page-title"><div><h1>{t('Purchase orders')}</h1><p>{t('Track orders placed with suppliers.')}</p></div><button className="inventory-primary"><ShoppingCart size={18} /> {t('New order')}</button></div>
-    <section className="inventory-panel"><div className="inventory-table-wrap"><table className="inventory-table"><thead><tr><th>{t('Order')}</th><th>{t('Supplier')}</th><th>{t('Items')}</th><th>{t('Date')}</th><th>{t('Total')}</th><th>{t('Status')}</th><th /></tr></thead><tbody>{orders.map((order) => <tr key={order.number}><td><strong>{order.number}</strong></td><td>{order.supplier}</td><td>{order.items}</td><td>{t(order.date)}</td><td>{order.total}</td><td><span className="stock-status status-in-stock">{t(order.status)}</span></td><td><ChevronRight size={18} /></td></tr>)}</tbody></table></div></section>
+    <div className="inventory-page-title"><div><h1>{t('Purchase orders')}</h1><p>{t('Plan orders, track deliveries, and receive stock into inventory.')}</p></div><button type="button" className="inventory-primary" onClick={openForm}><Plus size={18} /> {t('New order')}</button></div>
+    {notice && <div className="purchase-order-notice" role="status">{notice}<button type="button" onClick={() => setNotice('')} aria-label={t('Dismiss message')}><X size={16} /></button></div>}
+    <section className="inventory-panel">
+      <div className="inventory-panel-head"><div><h2>{t('Order history')}</h2><p>{t('Track each order from draft to delivery.')}</p></div></div>
+      {purchaseOrders.length ? <div className="inventory-table-wrap"><table className="inventory-table purchase-orders-table"><thead><tr><th>{t('Order')}</th><th>{t('Supplier')}</th><th>{t('Items')}</th><th>{t('Expected delivery')}</th><th>{t('Order total')}</th><th>{t('Status')}</th><th>{t('Action')}</th></tr></thead><tbody>{purchaseOrders.map((order) => {
+        const orderTotal = order.items.reduce((sum, item) => sum + item.quantity * item.unitCost, 0);
+        const statusClass = order.status === 'Received' ? 'status-in-stock' : order.status === 'Draft' ? 'status-low-stock' : 'status-ordered';
+        return <tr key={order.id}>
+          <td><strong>{order.number}</strong><small className="purchase-order-by">{t('Created by')} {order.createdBy}</small></td>
+          <td>{order.supplier}</td>
+          <td>{order.items.length} {t('products')}</td>
+          <td>{formatDate(order.expectedDate)}</td>
+          <td>ETB {orderTotal.toLocaleString()}</td>
+          <td><span className={`stock-status ${statusClass}`}>{t(order.status)}</span></td>
+          <td>{order.status === 'Draft' ? <button className="purchase-action-button" type="button" onClick={() => { placePurchaseOrder(order.id); setNotice(`${order.number} ${t('Purchase order placed. Stock will update when items are received.')}`); }}>{t('Place order')}</button>
+            : order.status === 'Ordered' ? pendingReceiveId === order.id
+              ? <div className="purchase-confirm-action"><button type="button" onClick={() => receiveOrder(order.id)}>{t('Confirm received')}</button><button type="button" onClick={() => setPendingReceiveId(null)}>{t('Cancel')}</button></div>
+              : <button className="purchase-action-button" type="button" onClick={() => setPendingReceiveId(order.id)}>{t('Receive items')}</button>
+              : <span className="purchase-received-label">{t('Received')}</span>}</td>
+        </tr>;
+      })}</tbody></table></div> : <div className="purchase-empty-state"><ShoppingCart size={28} /><h3>{t('No purchase orders yet')}</h3><p>{t('Create an order to plan upcoming stock deliveries.')}</p><button className="inventory-primary" type="button" onClick={openForm}><Plus size={17} /> {t('Create first order')}</button></div>}
+    </section>
   </>;
 }
 

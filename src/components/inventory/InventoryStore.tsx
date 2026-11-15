@@ -26,9 +26,23 @@ export type Movement = {
   quantity: number;
   date: string;
   performedBy?: string;
+  orderNumber?: string;
 };
 
 export type Sale = { id: number; productId: number; quantity: number; total: number; date: string; performedBy?: string };
+export type PurchaseOrderItem = { productId: number; quantity: number; unitCost: number };
+export type PurchaseOrder = {
+  id: number;
+  number: string;
+  supplier: string;
+  items: PurchaseOrderItem[];
+  expectedDate: string;
+  notes: string;
+  status: 'Draft' | 'Ordered' | 'Received';
+  createdAt: string;
+  createdBy: string;
+  receivedAt?: string;
+};
 
 const initialProducts: Product[] = [
   { id: 1, name: 'Engine oil 5W-30 · 4 L', category: 'Engine oil', sku: 'EO-5304', stock: 18, reorderLevel: 12, price: 3450 },
@@ -43,6 +57,31 @@ const initialMovements: Movement[] = [
   { id: 3, productId: 4, type: 'Stock received', quantity: 36, date: 'Yesterday' },
 ];
 
+const initialPurchaseOrders: PurchaseOrder[] = [
+  {
+    id: 1048,
+    number: 'PO-1048',
+    supplier: 'Addis Auto Supply',
+    items: [{ productId: 2, quantity: 24, unitCost: 720 }, { productId: 3, quantity: 4, unitCost: 3700 }],
+    expectedDate: '2026-11-18',
+    notes: '',
+    status: 'Ordered',
+    createdAt: '2026-11-12',
+    createdBy: 'Store Manager',
+  },
+  {
+    id: 1042,
+    number: 'PO-1042',
+    supplier: 'Mekonnen Oils',
+    items: [{ productId: 1, quantity: 12, unitCost: 2900 }, { productId: 4, quantity: 20, unitCost: 760 }],
+    expectedDate: '2026-11-10',
+    notes: '',
+    status: 'Received',
+    createdAt: '2026-11-08',
+    createdBy: 'Admin User',
+  },
+];
+
 type InventoryContextValue = {
   products: Product[];
   movements: Movement[];
@@ -50,6 +89,10 @@ type InventoryContextValue = {
   addMovement: (movement: Omit<Movement, 'id'>) => void;
   sales: Sale[];
   addSale: (sale: Omit<Sale, 'id'>) => void;
+  purchaseOrders: PurchaseOrder[];
+  createPurchaseOrder: (order: Omit<PurchaseOrder, 'id' | 'number' | 'createdAt'>) => void;
+  placePurchaseOrder: (id: number) => void;
+  receivePurchaseOrder: (id: number, performedBy: string) => void;
 };
 
 const InventoryContext = createContext<InventoryContextValue | null>(null);
@@ -67,10 +110,15 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('ewn-sales');
     return saved ? JSON.parse(saved) as Sale[] : [];
   });
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(() => {
+    const saved = localStorage.getItem('ewn-purchase-orders');
+    return saved ? JSON.parse(saved) as PurchaseOrder[] : initialPurchaseOrders;
+  });
 
   useEffect(() => localStorage.setItem('ewn-products', JSON.stringify(products)), [products]);
   useEffect(() => localStorage.setItem('ewn-movements', JSON.stringify(movements)), [movements]);
   useEffect(() => localStorage.setItem('ewn-sales', JSON.stringify(sales)), [sales]);
+  useEffect(() => localStorage.setItem('ewn-purchase-orders', JSON.stringify(purchaseOrders)), [purchaseOrders]);
 
   function addProduct(product: Omit<Product, 'id'>) {
     setProducts((current) => [...current, { ...product, id: Date.now() }]);
@@ -100,7 +148,47 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     }, ...current]);
   }
 
-  return <InventoryContext.Provider value={{ products, movements, sales, addProduct, addMovement, addSale }}>{children}</InventoryContext.Provider>;
+  function createPurchaseOrder(order: Omit<PurchaseOrder, 'id' | 'number' | 'createdAt'>) {
+    const id = Date.now();
+    const number = `PO-${String(id).slice(-6)}`;
+    setPurchaseOrders((current) => [{ ...order, id, number, createdAt: new Date().toISOString() }, ...current]);
+  }
+
+  function placePurchaseOrder(id: number) {
+    setPurchaseOrders((current) => current.map((order) => order.id === id && order.status === 'Draft'
+      ? { ...order, status: 'Ordered' }
+      : order));
+  }
+
+  function receivePurchaseOrder(id: number, performedBy: string) {
+    const order = purchaseOrders.find((entry) => entry.id === id);
+    if (!order || order.status !== 'Ordered') return;
+
+    const receivedAt = new Date().toISOString();
+    setPurchaseOrders((current) => current.map((entry) => entry.id === id && entry.status === 'Ordered'
+      ? { ...entry, status: 'Received', receivedAt }
+      : entry));
+    setProducts((current) => current.map((product) => {
+      const receivedQuantity = order.items
+        .filter((item) => item.productId === product.id)
+        .reduce((sum, item) => sum + item.quantity, 0);
+      return receivedQuantity ? { ...product, stock: product.stock + receivedQuantity } : product;
+    }));
+    setMovements((current) => [
+      ...order.items.map((item, index) => ({
+        id: Date.now() + index,
+        productId: item.productId,
+        type: 'Stock received' as const,
+        quantity: item.quantity,
+        date: 'Just now',
+        performedBy,
+        orderNumber: order.number,
+      })),
+      ...current,
+    ]);
+  }
+
+  return <InventoryContext.Provider value={{ products, movements, sales, addProduct, addMovement, addSale, purchaseOrders, createPurchaseOrder, placePurchaseOrder, receivePurchaseOrder }}>{children}</InventoryContext.Provider>;
 }
 
 export function useInventory() {
