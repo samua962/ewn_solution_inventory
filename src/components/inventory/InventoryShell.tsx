@@ -288,13 +288,17 @@ function InventoryTable({ products }: { products: Product[] }) {
 
 function ProductsPage() {
   const { t } = useLanguage();
-  const { products, addProduct } = useInventory();
+  const { products, categories, addProduct, addCategory, renameCategory, deleteCategory } = useInventory();
   const savedUser = localStorage.getItem('ewn-demo-user');
   const user = savedUser ? JSON.parse(savedUser) as { role: UserRole } : null;
   const canManageProducts = user?.role !== 'sales';
   const [showForm, setShowForm] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('Engine oil');
+  const [category, setCategory] = useState(categories[0] ?? '');
+  const [newCategory, setNewCategory] = useState('');
+  const [categoryDrafts, setCategoryDrafts] = useState<Record<string, string>>({});
+  const [categoryError, setCategoryError] = useState('');
   const [sku, setSku] = useState('');
   const [stock, setStock] = useState('0');
   const [reorderLevel, setReorderLevel] = useState('10');
@@ -309,12 +313,75 @@ function ProductsPage() {
     setShowForm(false);
   }
 
+  function openCategories() {
+    setCategoryDrafts(Object.fromEntries(categories.map((entry) => [entry, entry])));
+    setCategoryError('');
+    setShowCategories((open) => !open);
+  }
+
+  function createCategory(event: FormEvent) {
+    event.preventDefault();
+    const cleanName = newCategory.trim();
+    if (!addCategory(cleanName)) {
+      setCategoryError(t('Enter a unique category name.'));
+      return;
+    }
+    if (!category) setCategory(cleanName);
+    setNewCategory('');
+    setCategoryError('');
+  }
+
+  function saveCategory(currentName: string) {
+    if (!renameCategory(currentName, categoryDrafts[currentName] ?? currentName)) {
+      setCategoryError(t('A category with this name already exists.'));
+      return;
+    }
+    setCategoryDrafts((current) => {
+      const next = { ...current };
+      delete next[currentName];
+      next[(categoryDrafts[currentName] ?? currentName).trim()] = (categoryDrafts[currentName] ?? currentName).trim();
+      return next;
+    });
+    if (category === currentName) setCategory((categoryDrafts[currentName] ?? currentName).trim());
+    setCategoryError('');
+  }
+
+  function removeCategory(nameToDelete: string) {
+    deleteCategory(nameToDelete);
+    if (category === nameToDelete) setCategory(categories.find((entry) => entry !== nameToDelete) ?? '');
+    setCategoryDrafts((current) => {
+      const next = { ...current };
+      delete next[nameToDelete];
+      return next;
+    });
+  }
+
   return (
     <>
-      <div className="inventory-page-title"><div><h1>{t('Products')}</h1><p>{t('Manage oils, filters, and parts.')}</p></div>{canManageProducts && <button className="inventory-primary" onClick={() => setShowForm((open) => !open)}><PackagePlus size={18} /> {t('Add product')}</button>}</div>
+      <div className="inventory-page-title"><div><h1>{t('Products')}</h1><p>{t('Manage oils, filters, and parts.')}</p></div>{canManageProducts && <div className="products-page-actions"><button type="button" className="inventory-secondary" onClick={openCategories}><Boxes size={17} /> {t('Manage categories')}</button><button type="button" className="inventory-primary" onClick={() => setShowForm((open) => !open)}><PackagePlus size={18} /> {t('Add product')}</button></div>}</div>
+      {showCategories && canManageProducts && <section className="inventory-panel category-manager">
+        <div className="inventory-panel-head"><div><h2>{t('Your categories')}</h2><p>{t('Create categories that fit this business. Categories in use cannot be deleted.')}</p></div><button className="category-manager-close" type="button" onClick={() => setShowCategories(false)} aria-label={t('Close category manager')}><X size={18} /></button></div>
+        <form className="category-create-form" onSubmit={createCategory}>
+          <label>{t('New category')}<input value={newCategory} onChange={(event) => setNewCategory(event.target.value)} placeholder={t('e.g. Beverages, skincare, spare parts')} required /></label>
+          <button className="inventory-primary" type="submit"><Plus size={17} /> {t('Add category')}</button>
+        </form>
+        {categoryError && <p className="category-error" role="alert">{categoryError}</p>}
+        <div className="category-list">
+          {categories.map((entry) => {
+            const productCount = products.filter((product) => product.category === entry).length;
+            return <div className="category-list-row" key={entry}>
+              <input aria-label={`${t('Category name')}: ${entry}`} value={categoryDrafts[entry] ?? entry} onChange={(event) => setCategoryDrafts((current) => ({ ...current, [entry]: event.target.value }))} />
+              <span>{productCount} {t('products')}</span>
+              <button className="category-save-button" type="button" onClick={() => saveCategory(entry)}>{t('Rename')}</button>
+              <button className="category-delete-button" type="button" aria-label={`${t('Delete category')}: ${entry}`} disabled={productCount > 0} title={productCount > 0 ? t('Category is in use. Rename it instead of deleting.') : t('Delete category')} onClick={() => removeCategory(entry)}><Trash2 size={17} /></button>
+            </div>;
+          })}
+          {!categories.length && <p className="inventory-empty">{t('No categories yet. Add one above to get started.')}</p>}
+        </div>
+      </section>}
       {showForm && canManageProducts && <form className="inventory-form inventory-panel" onSubmit={submit}>
         <label>{t('Product name')}<input value={name} onChange={(event) => setName(event.target.value)} required /></label>
-        <label>{t('Category')}<select value={category} onChange={(event) => setCategory(event.target.value)}><option value="Engine oil">{t('Engine oil')}</option><option value="Filters">{t('Filters')}</option><option value="Brake parts">{t('Brake parts')}</option><option value="Accessories">{t('Accessories')}</option></select></label>
+        <label>{t('Category')}<select value={category} onChange={(event) => setCategory(event.target.value)} required disabled={!categories.length}><option value="" disabled>{t('Select category')}</option>{categories.map((entry) => <option key={entry} value={entry}>{entry}</option>)}</select>{!categories.length && <small className="category-required-note">{t('Add a category before creating a product.')}</small>}</label>
         <label>{t('Product code')}<input value={sku} onChange={(event) => setSku(event.target.value)} required /></label>
         <label>{t('Opening stock')}<input type="number" min="0" value={stock} onChange={(event) => setStock(event.target.value)} /></label>
         <label>{t('Low-stock level')}<input type="number" min="0" value={reorderLevel} onChange={(event) => setReorderLevel(event.target.value)} /></label>

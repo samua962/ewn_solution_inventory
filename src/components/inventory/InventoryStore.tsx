@@ -85,7 +85,11 @@ const initialPurchaseOrders: PurchaseOrder[] = [
 type InventoryContextValue = {
   products: Product[];
   movements: Movement[];
+  categories: string[];
   addProduct: (product: Omit<Product, 'id'>) => void;
+  addCategory: (name: string) => boolean;
+  renameCategory: (currentName: string, nextName: string) => boolean;
+  deleteCategory: (name: string) => void;
   addMovement: (movement: Omit<Movement, 'id'>) => void;
   sales: Sale[];
   addSale: (sale: Omit<Sale, 'id'>) => void;
@@ -102,6 +106,13 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('ewn-products');
     return saved ? JSON.parse(saved) as Product[] : initialProducts;
   });
+  const [categories, setCategories] = useState<string[]>(() => {
+    const saved = localStorage.getItem('ewn-categories');
+    if (saved) return JSON.parse(saved) as string[];
+    const savedProducts = localStorage.getItem('ewn-products');
+    const currentProducts = savedProducts ? JSON.parse(savedProducts) as Product[] : initialProducts;
+    return [...new Set(currentProducts.map((product) => product.category).filter(Boolean))];
+  });
   const [movements, setMovements] = useState<Movement[]>(() => {
     const saved = localStorage.getItem('ewn-movements');
     return saved ? JSON.parse(saved) as Movement[] : initialMovements;
@@ -116,12 +127,34 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => localStorage.setItem('ewn-products', JSON.stringify(products)), [products]);
+  useEffect(() => localStorage.setItem('ewn-categories', JSON.stringify(categories)), [categories]);
   useEffect(() => localStorage.setItem('ewn-movements', JSON.stringify(movements)), [movements]);
   useEffect(() => localStorage.setItem('ewn-sales', JSON.stringify(sales)), [sales]);
   useEffect(() => localStorage.setItem('ewn-purchase-orders', JSON.stringify(purchaseOrders)), [purchaseOrders]);
 
   function addProduct(product: Omit<Product, 'id'>) {
     setProducts((current) => [...current, { ...product, id: Date.now() }]);
+  }
+
+  function addCategory(name: string) {
+    const cleanName = name.trim();
+    if (!cleanName || categories.some((category) => category.toLowerCase() === cleanName.toLowerCase())) return false;
+    setCategories((current) => [...current, cleanName]);
+    return true;
+  }
+
+  function renameCategory(currentName: string, nextName: string) {
+    const cleanName = nextName.trim();
+    if (!cleanName || categories.some((category) => category !== currentName && category.toLowerCase() === cleanName.toLowerCase())) return false;
+    if (cleanName === currentName) return true;
+    setCategories((current) => current.map((category) => category === currentName ? cleanName : category));
+    setProducts((current) => current.map((product) => product.category === currentName ? { ...product, category: cleanName } : product));
+    return true;
+  }
+
+  function deleteCategory(name: string) {
+    if (products.some((product) => product.category === name)) return;
+    setCategories((current) => current.filter((category) => category !== name));
   }
 
   function addMovement(movement: Omit<Movement, 'id'>) {
@@ -188,7 +221,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     ]);
   }
 
-  return <InventoryContext.Provider value={{ products, movements, sales, addProduct, addMovement, addSale, purchaseOrders, createPurchaseOrder, placePurchaseOrder, receivePurchaseOrder }}>{children}</InventoryContext.Provider>;
+  return <InventoryContext.Provider value={{ products, movements, categories, sales, addProduct, addCategory, renameCategory, deleteCategory, addMovement, addSale, purchaseOrders, createPurchaseOrder, placePurchaseOrder, receivePurchaseOrder }}>{children}</InventoryContext.Provider>;
 }
 
 export function useInventory() {
