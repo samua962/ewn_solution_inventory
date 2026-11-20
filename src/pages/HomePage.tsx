@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { ArrowRight, BarChart3, Bot, Boxes, Compass, PackageCheck, Send, ShieldCheck, TrendingUp, Truck, X } from 'lucide-react';
+import { ArrowRight, BarChart3, Bot, Boxes, Compass, PackageCheck, RotateCcw, Send, ShieldCheck, TrendingUp, Truck, X } from 'lucide-react';
 import { features } from '../data';
 import { DashboardPreview } from '../components/dashboard/DashboardPreview';
 import { ButtonLink, Eyebrow, FeatureCard, FinalCta, SectionHeading } from '../components/ui';
@@ -60,6 +60,13 @@ export function HomePage() {
   function submitAssistant(event: FormEvent) {
     event.preventDefault();
     askAssistant(assistantInput);
+  }
+
+  function resetAssistant() {
+    setAssistantInput('');
+    setAssistantMessages([
+      { sender: 'assistant', text: 'Hello. I can help you learn about products, stock levels, sales, and reports.' },
+    ]);
   }
   const benefits = [
     { title: 'Track stock', icon: PackageCheck },
@@ -155,17 +162,27 @@ export function HomePage() {
       </button>
       {assistantOpen && (
         <aside className="assistant-panel" aria-label="EWN AI assistant">
-          <div className="assistant-head"><span><Bot size={19} /></span><div><strong>EWN Assistant</strong><small>Ready to help</small></div></div>
+          <div className="assistant-head">
+            <span><Bot size={19} /></span>
+            <div><strong>EWN Assistant</strong><small>Ready to help</small></div>
+            {assistantMessages.length > 1 && (
+              <button className="assistant-reset" type="button" onClick={resetAssistant} aria-label="Reset conversation" title="Reset conversation">
+                <RotateCcw size={15} />
+              </button>
+            )}
+          </div>
           <div className="assistant-conversation" aria-live="polite">
             {assistantMessages.map((message, index) => (
               <div className={`assistant-message assistant-message-${message.sender}`} key={`${message.sender}-${index}`}>{message.text}</div>
             ))}
           </div>
-          <div className="assistant-chips">
-            {assistantOptions.map((option) => (
-              <button type="button" key={option} onClick={() => askAssistant(option)}>{option}</button>
-            ))}
-          </div>
+          {assistantMessages.length === 1 && (
+            <div className="assistant-chips">
+              {assistantOptions.map((option) => (
+                <button type="button" key={option} onClick={() => askAssistant(option)}>{option}</button>
+              ))}
+            </div>
+          )}
           <form className="assistant-input" onSubmit={submitAssistant}>
             <input aria-label="Ask the assistant" placeholder="Type your question..." value={assistantInput} onChange={(event) => setAssistantInput(event.target.value)} />
             <button type="submit" disabled={!assistantInput.trim()} aria-label="Send question"><Send size={17} /></button>

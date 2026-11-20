@@ -1418,6 +1418,28 @@ body {
   font-size: 10px;
 }
 
+.assistant-head > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.assistant-reset {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  flex: 0 0 32px;
+  place-items: center;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .1);
+  cursor: pointer;
+}
+
+.assistant-reset:hover {
+  background: rgba(255, 255, 255, .18);
+}
+
 .assistant-message {
   max-width: 86%;
   margin: 14px;
