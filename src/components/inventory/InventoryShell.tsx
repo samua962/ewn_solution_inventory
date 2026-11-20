@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowLeft, BarChart3, Bell, Bot, Boxes, CalendarDays, ChevronRight, CircleGauge, Download, LockKeyhole, Menu, Minus, PackagePlus, Plus, Printer, RotateCcw, Search, Send, ShoppingCart, Sparkles, Trash2, Users, X } from 'lucide-react';
+import { ArrowLeft, BarChart3, Bell, Bot, Boxes, CalendarDays, Check, ChevronRight, CircleGauge, Download, LockKeyhole, Menu, Minus, PackagePlus, Plus, Printer, RotateCcw, Search, Send, Settings, ShoppingCart, Sparkles, Trash2, UserRound, Users, X } from 'lucide-react';
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { useInventory, type Product, type PurchaseOrderItem } from './InventoryStore';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +15,7 @@ const navItems = [
   { to: '/app/sales', label: 'New sale', icon: ShoppingCart },
   { to: '/app/users', label: 'Users', icon: Users },
   { to: '/app/assistant', label: 'AI assistant', icon: Sparkles },
+  { to: '/app/profile', label: 'Profile & settings', icon: Settings },
 ];
 
 function statusFor(product: Product) {
@@ -68,22 +69,24 @@ export function InventoryShell() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const navigate = useNavigate();
-  const { products } = useInventory();
+  const { products, workspaceSettings } = useInventory();
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('ewn-demo-user');
+    return saved ? JSON.parse(saved) as { name: string; email: string; role: UserRole } : null;
+  });
   const lowStockProducts = products.filter((product) => product.stock <= product.reorderLevel);
-  const savedUser = localStorage.getItem('ewn-demo-user');
-  const user = savedUser ? JSON.parse(savedUser) as { name: string; role: UserRole } : null;
   if (!user) {
     navigate('/login', { replace: true });
     return null;
   }
   const canManageStock = user.role !== 'sales';
-  const visibleNav = navItems.filter((item) => item.to === '/app/assistant' || (user.role === 'sales'
+  const visibleNav = navItems.filter((item) => item.to === '/app/assistant' || item.to === '/app/profile' || (user.role === 'sales'
     ? item.to === '/app/dashboard' || item.to === '/app/products' || item.to === '/app/sales'
     : (item.to !== '/app/sales' || user.role === 'admin') && (item.to !== '/app/users' || user.role === 'admin')));
   return (
     <div className="inventory-app">
       <aside className={`inventory-sidebar${menuOpen ? ' is-open' : ''}`}>
-        <div className="inventory-brand"><span>EW</span><div><strong>EWN Inventory</strong><small>Selam Auto Parts</small></div></div>
+        <div className="inventory-brand"><span>EW</span><div><strong>EWN Inventory</strong><small>{workspaceSettings.name}</small></div></div>
         <button className="inventory-close" type="button" onClick={() => setMenuOpen(false)} aria-label={t('Close menu')}><X /></button>
         <nav>
           {visibleNav.map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} onClick={() => setMenuOpen(false)}><Icon size={19} /><span>{t(label)}</span></NavLink>)}
@@ -94,16 +97,16 @@ export function InventoryShell() {
       <div className="inventory-main">
         <header className="inventory-topbar">
           <button type="button" onClick={() => setMenuOpen(true)} aria-label={t('Open menu')}><Menu /></button>
-          <div><strong>Selam Auto Parts Shop</strong><small>{t('Inventory workspace')}</small></div>
+          <div><strong>{workspaceSettings.name}</strong><small>{t('Inventory workspace')}</small></div>
           <div className="inventory-notifications">
             <button className="notification-button" type="button" aria-label={t('Open notifications')} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen((open) => !open)}>
               <Bell size={21} />
-              {lowStockProducts.length > 0 && <span className="notification-count">{lowStockProducts.length}</span>}
+              {workspaceSettings.lowStockNotifications && lowStockProducts.length > 0 && <span className="notification-count">{lowStockProducts.length}</span>}
             </button>
             {notificationsOpen && (
               <div className="notification-panel">
-                <div className="notification-panel-head"><strong>{t('Notifications')}</strong><span>{lowStockProducts.length} {t('alerts')}</span></div>
-                {lowStockProducts.length ? lowStockProducts.slice(0, 5).map((product) => (
+                <div className="notification-panel-head"><strong>{t('Notifications')}</strong><span>{workspaceSettings.lowStockNotifications ? `${lowStockProducts.length} ${t('alerts')}` : t('Off')}</span></div>
+                {!workspaceSettings.lowStockNotifications ? <p className="notification-empty">{t('Low-stock notifications are turned off in Profile & settings.')}</p> : lowStockProducts.length ? lowStockProducts.slice(0, 5).map((product) => (
                   <button key={product.id} type="button" className="notification-item" onClick={() => { setNotificationsOpen(false); navigate('/app/products'); }}>
                     <span className="notification-dot" />
                     <span><strong>{product.name}</strong><small>{product.stock === 0 ? t('Out of stock') : `${product.stock} ${t('units remaining')}`}</small></span>
@@ -112,7 +115,9 @@ export function InventoryShell() {
               </div>
             )}
           </div>
-          <span className="inventory-avatar">{user.name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()}</span>
+          <NavLink className="inventory-avatar-link" to="/app/profile" aria-label={t('Open profile and settings')} title={t('Profile & settings')}>
+            <span className="inventory-avatar">{user.name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()}</span>
+          </NavLink>
         </header>
         <main>
           <Routes>
@@ -125,6 +130,7 @@ export function InventoryShell() {
             <Route path="sales" element={user.role !== 'manager' ? <SalesPage /> : <Navigate to="/app/dashboard" replace />} />
             <Route path="users" element={user.role === 'admin' ? <UsersPage /> : <Navigate to="/app/dashboard" replace />} />
             <Route path="assistant" element={<AssistantPage userName={user.name} role={user.role} />} />
+            <Route path="profile" element={<ProfileSettingsPage user={user} onUserUpdate={setUser} />} />
           </Routes>
         </main>
       </div>
@@ -239,6 +245,98 @@ function AssistantPage({ userName, role }: { userName: string; role: UserRole })
 function PageTitle({ title, text }: { title: string; text: string }) {
   const { t } = useLanguage();
   return <div className="inventory-page-title"><div><h1>{t(title)}</h1><p>{t(text)}</p></div></div>;
+}
+
+type StaffUser = { name: string; email: string; role: UserRole };
+
+function ProfileSettingsPage({ user, onUserUpdate }: { user: StaffUser; onUserUpdate: (user: StaffUser) => void }) {
+  const { t, language, setLanguage } = useLanguage();
+  const { workspaceSettings, updateWorkspaceSettings } = useInventory();
+  const profileKey = `ewn-profile-${user.email}`;
+  const [name, setName] = useState(user.name);
+  const [phone, setPhone] = useState(() => {
+    const savedProfile = localStorage.getItem(profileKey);
+    return savedProfile ? (JSON.parse(savedProfile) as { phone?: string }).phone ?? '' : '';
+  });
+  const [workspaceName, setWorkspaceName] = useState(workspaceSettings.name);
+  const [lowStockNotifications, setLowStockNotifications] = useState(workspaceSettings.lowStockNotifications);
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
+  const isAdmin = user.role === 'admin';
+  const initials = user.name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase();
+
+  function saveProfile(event: FormEvent) {
+    event.preventDefault();
+    const nextUser = { ...user, name: name.trim() };
+    localStorage.setItem('ewn-demo-user', JSON.stringify(nextUser));
+    localStorage.setItem(profileKey, JSON.stringify({ phone: phone.trim() }));
+    const savedUsers = localStorage.getItem('ewn-managed-users');
+    if (savedUsers) {
+      const users = JSON.parse(savedUsers) as Array<{ email: string; name: string }>;
+      localStorage.setItem('ewn-managed-users', JSON.stringify(users.map((entry) => entry.email === user.email ? { ...entry, name: name.trim() } : entry)));
+    }
+    onUserUpdate(nextUser);
+    setProfileSaved(true);
+    window.setTimeout(() => setProfileSaved(false), 2500);
+  }
+
+  function saveWorkspaceSettings(event: FormEvent) {
+    event.preventDefault();
+    updateWorkspaceSettings({ name: workspaceName, lowStockNotifications });
+    setSettingsSaved(true);
+    window.setTimeout(() => setSettingsSaved(false), 2500);
+  }
+
+  return (
+    <>
+      <PageTitle title="Profile & settings" text="Manage your account and workspace preferences in one place." />
+      <div className="profile-settings-layout">
+        <div className="profile-settings-main">
+          <section className="inventory-panel profile-settings-card">
+            <div className="profile-section-heading">
+              <span className="profile-avatar-large">{initials}</span>
+              <div><h2>{t('Profile information')}</h2><p>{t('Your personal account details.')}</p></div>
+            </div>
+            <form className="profile-settings-form" onSubmit={saveProfile}>
+              <label>{t('Full name')}<input value={name} onChange={(event) => setName(event.target.value)} required /></label>
+              <label>{t('Email address')}<input type="email" value={user.email} readOnly aria-readonly="true" /><small>{t('Email is linked to your demo sign-in.')}</small></label>
+              <label>{t('Phone number')} <span>{t('(optional)')}</span><input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="+251 ..." /></label>
+              <label>{t('Role')}<input value={t(roleLabel(user.role))} readOnly aria-readonly="true" /></label>
+              <div className="profile-form-footer">{profileSaved && <span role="status"><Check size={16} /> {t('Profile saved.')}</span>}<button className="inventory-primary" type="submit">{t('Save profile')}</button></div>
+            </form>
+          </section>
+
+          <section className="inventory-panel profile-settings-card">
+            <div className="profile-section-heading">
+              <span className="profile-section-icon"><Settings size={20} /></span>
+              <div><h2>{t('Workspace settings')}</h2><p>{t('Preferences for this business workspace.')}</p></div>
+            </div>
+            <form className="profile-settings-form" onSubmit={saveWorkspaceSettings}>
+              <label>{t('Business name')}<input value={workspaceName} onChange={(event) => setWorkspaceName(event.target.value)} disabled={!isAdmin} required /></label>
+              {!isAdmin && <p className="profile-permission-note">{t('Only an Admin can change workspace settings.')}</p>}
+              <div className="profile-setting-row">
+                <span><strong>{t('Low-stock notifications')}</strong><small>{t('Show alerts when products reach their reorder level.')}</small></span>
+                <button className={`settings-toggle${lowStockNotifications ? ' is-on' : ''}`} type="button" role="switch" aria-checked={lowStockNotifications} aria-label={t('Low-stock notifications')} disabled={!isAdmin} onClick={() => setLowStockNotifications((enabled) => !enabled)}><span /></button>
+              </div>
+              <div className="language-picker profile-language-picker" role="group" aria-label={t('Choose language')}><span>{t('Language')}</span><button type="button" className={language === 'en' ? 'active' : ''} aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>English</button><button type="button" className={language === 'am' ? 'active' : ''} aria-pressed={language === 'am'} onClick={() => setLanguage('am')}>አማርኛ</button></div>
+              <div className="profile-form-footer">{settingsSaved && <span role="status"><Check size={16} /> {t('Settings saved.')}</span>}<button className="inventory-primary" type="submit" disabled={!isAdmin}>{t('Save settings')}</button></div>
+            </form>
+          </section>
+        </div>
+
+        <aside className="profile-summary-card">
+          <span className="profile-summary-icon"><UserRound size={22} /></span>
+          <span className="profile-summary-label">{t('SIGNED IN AS')}</span>
+          <h2>{name || user.name}</h2>
+          <p>{user.email}</p>
+          <span className="profile-role-badge">{t(roleLabel(user.role))}</span>
+          <div className="profile-summary-divider" />
+          <strong>{workspaceSettings.name}</strong>
+          <small>{t('Inventory workspace')}</small>
+        </aside>
+      </div>
+    </>
+  );
 }
 
 function Dashboard() {

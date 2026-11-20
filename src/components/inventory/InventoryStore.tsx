@@ -43,6 +43,7 @@ export type PurchaseOrder = {
   createdBy: string;
   receivedAt?: string;
 };
+export type WorkspaceSettings = { name: string; lowStockNotifications: boolean };
 
 const initialProducts: Product[] = [
   { id: 1, name: 'Engine oil 5W-30 · 4 L', category: 'Engine oil', sku: 'EO-5304', stock: 18, reorderLevel: 12, price: 3450 },
@@ -86,10 +87,12 @@ type InventoryContextValue = {
   products: Product[];
   movements: Movement[];
   categories: string[];
+  workspaceSettings: WorkspaceSettings;
   addProduct: (product: Omit<Product, 'id'>) => void;
   addCategory: (name: string) => boolean;
   renameCategory: (currentName: string, nextName: string) => boolean;
   deleteCategory: (name: string) => void;
+  updateWorkspaceSettings: (settings: WorkspaceSettings) => void;
   addMovement: (movement: Omit<Movement, 'id'>) => void;
   sales: Sale[];
   addSale: (sale: Omit<Sale, 'id'>) => void;
@@ -113,6 +116,10 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     const currentProducts = savedProducts ? JSON.parse(savedProducts) as Product[] : initialProducts;
     return [...new Set(currentProducts.map((product) => product.category).filter(Boolean))];
   });
+  const [workspaceSettings, setWorkspaceSettings] = useState<WorkspaceSettings>(() => {
+    const saved = localStorage.getItem('ewn-workspace-settings');
+    return saved ? JSON.parse(saved) as WorkspaceSettings : { name: 'Selam Auto Parts Shop', lowStockNotifications: true };
+  });
   const [movements, setMovements] = useState<Movement[]>(() => {
     const saved = localStorage.getItem('ewn-movements');
     return saved ? JSON.parse(saved) as Movement[] : initialMovements;
@@ -128,6 +135,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => localStorage.setItem('ewn-products', JSON.stringify(products)), [products]);
   useEffect(() => localStorage.setItem('ewn-categories', JSON.stringify(categories)), [categories]);
+  useEffect(() => localStorage.setItem('ewn-workspace-settings', JSON.stringify(workspaceSettings)), [workspaceSettings]);
   useEffect(() => localStorage.setItem('ewn-movements', JSON.stringify(movements)), [movements]);
   useEffect(() => localStorage.setItem('ewn-sales', JSON.stringify(sales)), [sales]);
   useEffect(() => localStorage.setItem('ewn-purchase-orders', JSON.stringify(purchaseOrders)), [purchaseOrders]);
@@ -155,6 +163,10 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   function deleteCategory(name: string) {
     if (products.some((product) => product.category === name)) return;
     setCategories((current) => current.filter((category) => category !== name));
+  }
+
+  function updateWorkspaceSettings(settings: WorkspaceSettings) {
+    setWorkspaceSettings({ ...settings, name: settings.name.trim() || 'My Business' });
   }
 
   function addMovement(movement: Omit<Movement, 'id'>) {
@@ -221,7 +233,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     ]);
   }
 
-  return <InventoryContext.Provider value={{ products, movements, categories, sales, addProduct, addCategory, renameCategory, deleteCategory, addMovement, addSale, purchaseOrders, createPurchaseOrder, placePurchaseOrder, receivePurchaseOrder }}>{children}</InventoryContext.Provider>;
+  return <InventoryContext.Provider value={{ products, movements, categories, workspaceSettings, sales, addProduct, addCategory, renameCategory, deleteCategory, updateWorkspaceSettings, addMovement, addSale, purchaseOrders, createPurchaseOrder, placePurchaseOrder, receivePurchaseOrder }}>{children}</InventoryContext.Provider>;
 }
 
 export function useInventory() {
