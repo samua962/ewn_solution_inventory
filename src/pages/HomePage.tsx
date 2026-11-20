@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { ArrowRight, BarChart3, Bot, Boxes, Compass, PackageCheck, Send, ShieldCheck, TrendingUp, Truck, X } from 'lucide-react';
 import { features } from '../data';
 import { DashboardPreview } from '../components/dashboard/DashboardPreview';
@@ -10,6 +10,57 @@ import addisHardwareLogo from '../../asset/vertex-supply.svg';
 
 export function HomePage() {
   const [assistantOpen, setAssistantOpen] = useState(false);
+  const [assistantInput, setAssistantInput] = useState('');
+  const [assistantMessages, setAssistantMessages] = useState<Array<{ sender: 'assistant' | 'user'; text: string }>>([
+    { sender: 'assistant', text: 'Hello. I can help you learn about products, stock levels, sales, and reports.' },
+  ]);
+  const assistantOptions = [
+    'How does stock work?',
+    'Show inventory features',
+    'How do purchase orders work?',
+  ];
+
+  function publicAssistantReply(question: string) {
+    const prompt = question.toLowerCase();
+    if (prompt.includes('stock') || prompt.includes('inventory') || prompt.includes('movement')) {
+      return 'Track products and quantities in one place. Stock can be received, sold, adjusted, or reviewed through low-stock alerts and the inventory overview.';
+    }
+    if (prompt.includes('feature') || prompt.includes('product') || prompt.includes('tool')) {
+      return 'EWN Inventory includes product management, stock tracking, purchase orders, sales, reports, and role-based team access.';
+    }
+    if (prompt.includes('purchase') || prompt.includes('order') || prompt.includes('supplier')) {
+      return 'Create a purchase order with a supplier and product quantities. Save it as a draft, place the order, and receive it later to update stock automatically.';
+    }
+    if (prompt.includes('sale') || prompt.includes('sell') || prompt.includes('checkout')) {
+      return 'Add products to a new sale, enter payment details, and complete the sale. Stock quantities update immediately in the prototype.';
+    }
+    if (prompt.includes('report') || prompt.includes('export')) {
+      return 'Review stock value and movements in Reports. Choose a daily or weekly view, then export the report as CSV or PDF.';
+    }
+    if (prompt.includes('price') || prompt.includes('plan') || prompt.includes('cost')) {
+      return 'You can compare the available prototype plans on the Pricing page. For this demo, the guided view is available without setup.';
+    }
+    if (prompt.includes('demo') || prompt.includes('try')) {
+      return 'Open the guided demo to explore the complete inventory workflow, or sign in to the staff prototype with one of the sample accounts.';
+    }
+    return 'I can guide you through stock, products, sales, purchase orders, reports, pricing, or the guided demo. Choose an option or ask a question about one of these topics.';
+  }
+
+  function askAssistant(question: string) {
+    const trimmed = question.trim();
+    if (!trimmed) return;
+    setAssistantMessages((current) => [
+      ...current,
+      { sender: 'user', text: trimmed },
+      { sender: 'assistant', text: publicAssistantReply(trimmed) },
+    ]);
+    setAssistantInput('');
+  }
+
+  function submitAssistant(event: FormEvent) {
+    event.preventDefault();
+    askAssistant(assistantInput);
+  }
   const benefits = [
     { title: 'Track stock', icon: PackageCheck },
     { title: 'See stock levels', icon: Compass },
@@ -105,9 +156,20 @@ export function HomePage() {
       {assistantOpen && (
         <aside className="assistant-panel" aria-label="EWN AI assistant">
           <div className="assistant-head"><span><Bot size={19} /></span><div><strong>EWN Assistant</strong><small>Ready to help</small></div></div>
-          <div className="assistant-message">Hello. I can help you learn about products, stock levels, sales, and reports.</div>
-          <div className="assistant-chips"><button type="button">How does stock work?</button><button type="button">Show inventory features</button></div>
-          <label className="assistant-input"><input aria-label="Ask the assistant" placeholder="Type your question..." /><button type="button" aria-label="Send question"><Send size={17} /></button></label>
+          <div className="assistant-conversation" aria-live="polite">
+            {assistantMessages.map((message, index) => (
+              <div className={`assistant-message assistant-message-${message.sender}`} key={`${message.sender}-${index}`}>{message.text}</div>
+            ))}
+          </div>
+          <div className="assistant-chips">
+            {assistantOptions.map((option) => (
+              <button type="button" key={option} onClick={() => askAssistant(option)}>{option}</button>
+            ))}
+          </div>
+          <form className="assistant-input" onSubmit={submitAssistant}>
+            <input aria-label="Ask the assistant" placeholder="Type your question..." value={assistantInput} onChange={(event) => setAssistantInput(event.target.value)} />
+            <button type="submit" disabled={!assistantInput.trim()} aria-label="Send question"><Send size={17} /></button>
+          </form>
         </aside>
       )}
 
