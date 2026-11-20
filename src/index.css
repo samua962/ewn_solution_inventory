@@ -420,6 +420,9 @@ p { color: var(--color-text-secondary); }
 .auth-page { min-height: 650px; display: grid; place-items: center; padding: 62px 24px; background: linear-gradient(135deg, #f6f9fd, #edf5ff); }
 .auth-card { width: min(100%, 440px); padding: 34px; border: 1px solid var(--color-border); border-radius: 13px; background: white; box-shadow: 0 18px 55px rgba(18,59,112,.1); }
 .auth-brand { margin-bottom: 32px; }
+.afri-login-brand { display: inline-flex; align-items: center; gap: 11px; color: var(--color-navy); }
+.afri-login-brand > span { width: 42px; height: 42px; display: grid; place-items: center; color: #fff; border-radius: 9px; background: var(--color-primary); font-size: 15px; font-weight: 800; }
+.afri-login-brand > strong { font-family: Manrope, 'Segoe UI', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -.03em; }
 .auth-card > .eyebrow { margin-bottom: 8px; }
 .auth-card h1 { margin-bottom: 8px; font-size: 28px; }
 .auth-intro { margin-bottom: 23px; font-size: 12px; }

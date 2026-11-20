@@ -135,8 +135,8 @@ export function Layout({ children }: { children: ReactNode }) {
       description: 'Contact EWN Solutions about EWN Inventory or the demo.',
     },
     '/login': {
-      title: 'Sign In — EWN Solutions',
-      description: 'Sign in to your EWN Inventory account.',
+      title: 'Sign In — AFRI Inventory',
+      description: 'Sign in to your AFRI Inventory account.',
     },
     '/demo': {
       title: 'Guided Demo — EWN Inventory',

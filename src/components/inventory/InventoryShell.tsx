@@ -86,7 +86,7 @@ export function InventoryShell() {
   return (
     <div className="inventory-app">
       <aside className={`inventory-sidebar${menuOpen ? ' is-open' : ''}`}>
-        <div className="inventory-brand"><span>EW</span><div><strong>EWN Inventory</strong><small>{workspaceSettings.name}</small></div></div>
+        <div className="inventory-brand"><span>AF</span><div><strong>AFRI Inventory</strong><small>{workspaceSettings.name}</small></div></div>
         <button className="inventory-close" type="button" onClick={() => setMenuOpen(false)} aria-label={t('Close menu')}><X /></button>
         <nav>
           {visibleNav.map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} onClick={() => setMenuOpen(false)}><Icon size={19} /><span>{t(label)}</span></NavLink>)}
@@ -182,14 +182,14 @@ function AssistantPage({ userName, role }: { userName: string; role: UserRole })
   return (
     <div className="assistant-page">
       <div className="assistant-page-intro">
-        <div><span className="assistant-intro-label"><Sparkles size={14} /> {t('EWN HELP CENTER')}</span><h1>{t('How can we help?')}</h1><p>{t('Get guidance for everyday tasks and learn what’s available in your role.')}</p></div>
+        <div><span className="assistant-intro-label"><Sparkles size={14} /> {t('AFRI HELP CENTER')}</span><h1>{t('How can we help?')}</h1><p>{t('Get guidance for everyday tasks and learn what’s available in your role.')}</p></div>
         <span className="assistant-intro-badge"><span /> {t('Guided help preview')}</span>
       </div>
       <div className="assistant-page-layout">
         <section className="assistant-chat-card">
           <header className="assistant-page-header">
             <span className="assistant-avatar"><Bot size={22} /></span>
-            <div className="assistant-heading"><strong>{t('EWN assistant')}</strong><small>{t('Product and workflow guide')}</small></div>
+            <div className="assistant-heading"><strong>{t('AFRI assistant')}</strong><small>{t('Product and workflow guide')}</small></div>
             {messages.length > 0 && <button className="assistant-reset-button" type="button" onClick={resetConversation}><RotateCcw size={14} /> {t('New chat')}</button>}
           </header>
           <div className="assistant-page-conversation" aria-live="polite">
@@ -734,7 +734,7 @@ function ReportsPage() {
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
     const link = document.createElement('a');
     link.href = url;
-    link.download = `ewn-${period.toLowerCase()}-stock-report.csv`;
+    link.download = `afri-${period.toLowerCase()}-stock-report.csv`;
     link.click();
     URL.revokeObjectURL(url);
   }

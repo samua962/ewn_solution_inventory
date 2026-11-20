@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Logo } from '../components/layout/Layout';
 import { Eyebrow, FormField } from '../components/ui';
 import { demoUsers, type UserRole } from '../components/inventory/InventoryStore';
 
@@ -37,7 +36,7 @@ export function LoginPage() {
   return (
     <section className="auth-page">
       <div className="auth-card">
-        <div className="auth-brand"><Logo /></div>
+        <div className="auth-brand"><div className="afri-login-brand"><span>AF</span><strong>AFRI Inventory</strong></div></div>
         <Eyebrow>Welcome back</Eyebrow>
         <h1>Sign in</h1>
         <p className="auth-intro">Choose a demo account and sign in.</p>
